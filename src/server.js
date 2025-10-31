@@ -35,4 +35,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || "Internal server error" });
 });
 
-app.listen(ENV.PORT, () => console.log("server is running on port:", ENV.PORT));
+if (ENV.NODE_ENV !== 'production') {
+    app.listen(ENV.PORT, () => console.log("server is running on port:", ENV.PORT));
+}
+
+export default app
