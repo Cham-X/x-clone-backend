@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import userRoutes from "./routes/user.route.js"
 import postRoutes from "./routes/post.route.js"
 import commentRoutes from './routes/comment.route.js'
+import notificationRoutes from './routes/notfication.route.js'
 import { arcjetMiddleware } from "./middleware/arcjet.middleware.js";
 
 
