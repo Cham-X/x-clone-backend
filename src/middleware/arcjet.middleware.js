@@ -1,29 +1,38 @@
 import arcjet, { tokenBucket, shield, detectBot } from "@arcjet/node";
 
-// initialize Arcjet with security rules
-export const aj = arcjet({
+const aj = arcjet({
   key: process.env.ARCJET_KEY,
   characteristics: ["ip.src"],
   rules: [
-    // shield protects your app from common attacks e.g. SQL injection, XSS, CSRF attacks
     shield({ mode: "LIVE" }),
-
-    // bot detection - block all bots except search engines
     detectBot({
       mode: "LIVE",
-      allow: [
-        "CATEGORY:SEARCH_ENGINE",
-        // allow legitimate search engine bots
-        // see full list at https://arcjet.com/bot-list
-      ],
+      allow: ["CATEGORY:SEARCH_ENGINE"]
     }),
-
-    // rate limiting with token bucket algorithm
     tokenBucket({
       mode: "LIVE",
-      refillRate: 10, // tokens added per interval
-      interval: 10, // interval in seconds (10 seconds)
-      capacity: 15, // maximum tokens in bucket
+      refillRate: 10,
+      interval: 10,
+      capacity: 15,
     }),
   ],
 });
+
+export const arcjetMiddleware = async (req, res, next) => {
+  try {
+    const decision = await aj.protect(req);
+    // If blocked:
+    if (decision.isDenied()) {
+      // for example if rate limit
+      if (decision.reason.isRateLimit && decision.reason.isRateLimit()) {
+        return res.status(429).json({ error: "Too Many Requests" });
+      }
+      return res.status(403).json({ error: "Request blocked by Arcjet" });
+    }
+    // allowed
+    next();
+  } catch (err) {
+    console.error("Arcjet error:", err);
+    next(); // or fail safe
+  }
+};
