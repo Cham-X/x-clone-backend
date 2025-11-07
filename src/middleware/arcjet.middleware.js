@@ -19,6 +19,16 @@ const aj = arcjet({
 });
 
 export const arcjetMiddleware = async (req, res, next) => {
+   const allowedOrigins = [
+    "https://x-clone-frontend.vercel.app", 
+  ];
+
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin) || origin?.includes("localhost")) {
+    return next();
+  }
+  
   try {
     const decision = await aj.protect(req);
     // If blocked:
