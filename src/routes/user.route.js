@@ -7,9 +7,9 @@ const router = express.Router();
 //public route
 router.get('/profile/:username', getUserProfile)
 
-//protected route
+//protected routex`
 router.post('/sync',protectedRoute,syncUser)
-router.post('/me',protectedRoute,getCurrentUser)
+router.get('/me',protectedRoute,getCurrentUser)
 router.put('/update-profile', protectedRoute, updateProfile)
 router.post('/follow/:targetUserId',protectedRoute,followUser)
 
