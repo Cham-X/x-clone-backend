@@ -1,16 +1,18 @@
 import arcjet, { tokenBucket, shield, detectBot } from "@arcjet/node";
 
+const mode = process.env.NODE_ENV === "production" ? "LIVE" : "DRY_RUN";
+
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   characteristics: ["ip.src"],
   rules: [
-    shield({ mode: "LIVE" }),
+    shield({ mode }),
     detectBot({
-      mode: "LIVE",
+      mode,
       allow: ["CATEGORY:SEARCH_ENGINE"]
     }),
     tokenBucket({
-      mode: "LIVE",
+      mode,
       refillRate: 10,
       interval: 10,
       capacity: 15,
@@ -28,7 +30,7 @@ export const arcjetMiddleware = async (req, res, next) => {
   if (allowedOrigins.includes(origin) || origin?.includes("localhost")) {
     return next();
   }
-  
+
   try {
     const decision = await aj.protect(req);
     // If blocked:
